@@ -2,25 +2,72 @@
 
 This repository contains the experimental results for the fine-tuning of Vision-Language Models (VLMs) on the `sinhala-ocr-lk-acts-1010` dataset. The dataset consists of 1,010 real-world page-level images from Sri Lankan Legislative Acts (spanning 1981–2019) and their transcriptions.
 
-## Hyperparameter Tuning & Research Results
+---
 
-The table below summarizes the hyperparameter configurations and the corresponding performance metrics for all 8 fine-tuning experiments conducted with QLoRA adaptation. 
+## Experiment Parameter Details
 
-The experiments vary by Model, GPU hardware, Quantization level, LoRA rank ($r$), LoRA alpha ($\alpha$), and Dropout. All models were evaluated on the same 202-sample held-out test set.
+The table below shows the full hyperparameter configurations for all 8 fine-tuning experiments (Experiments 1–8) conducted on the `sinhala-ocr-lk-acts-1010` dataset (1,010 samples, split 70/10/20).
 
-| Exp | Model | GPU | Quant | LoRA $r$ | LoRA $\alpha$ | Drop | Epochs | LR | BS | GA | Opt | CER (↓) | WER (↓) | METEOR (↑) | BLEU (↑) | ANLS (↑) |
-|:---:|:---|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|---:|---:|---:|---:|---:|
-| **1** | DeepSeek-OCR V1 | P100 (16 GB) | 4-bit NF4 | 16 | 16 | 0 | 3 | 2e-4 | 2 | 4 | adamw_8bit | 3.02% | 12.27% | 0.8441 | 0.9531 | 0.9698 |
-| **2** | DeepSeek-OCR V2 | A100 (80 GB) | 16-bit | 32 | 64 | 0.1 | 50 | 2e-4 | 6 | 3 | adamw_torch_fused | 34.71% | 47.45% | 0.5191 | 0.7288 | 0.6529 |
-| **3** | DeepSeek-OCR V2 | A100 (80 GB) | 16-bit | 16 | 16 | 0 | 50 | 2e-4 | 8 | 2 | adamw_8bit | 6.94% | 17.23% | 0.7739 | 0.9153 | 0.9306 |
-| **4** | DeepSeek-OCR V2 | RTX 5090 | 4-bit NF4 | 16 | 16 | 0 | 50 | 2e-4 | 2 | 4 | adamw_8bit | 6.94% | 18.28% | 0.7794 | 0.9181 | 0.9306 |
-| **5** | LightOnOCR-2-1B | P100 (16 GB) | 4-bit NF4 | 16 | 16 | 0.05 | 20 | 2.5e-4 | 2 | 8 | adamw_torch_fused | 25.17% | 38.31% | 0.5342 | 0.7329 | 0.7483 |
-| **6** | LightOnOCR-2-1B | P100 (16 GB) | 4-bit NF4 | 32 | 64 | 0.1 | 30 | 5e-5 | 1 | 16 | adamw_8bit | 14.13% | 21.18% | 0.6541 | 0.8332 | 0.8587 |
-| **7** | **LightOnOCR-2-1B** (1540px)* | RTX 4090 | 4-bit NF4 | 32 | 64 | 0.1 | 20 | 2e-4 | 4 | 1 | adamw_torch_fused | **1.05%** | **5.63%** | **0.9492** | **0.9808** | **0.9895** |
-| **8** | DeepSeek-OCR V2 | RTX 3090 | 4-bit NF4 | 16 | 16 | 0 | 20 | 2e-4 | 2 | 4 | adamw_8bit | 8.31% | 19.75% | 0.7602 | 0.9046 | 0.9169 |
+### Training Parameters
 
-*\*Experiment 7 is the top performer, achieving state-of-the-art results for real-world historical Sinhala OCR by utilizing a higher input resolution of 1540px.*
+| Exp | Base Model | Model Size | Epochs | Learning Rate | Train BS | Eval BS | Grad. Accum. | Grad. Checkpointing | LR Scheduler | Warmup Steps | Optimizer | Weight Decay | Eval Strategy | Eval Steps | Dataloader Workers |
+|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|:---:|:---|:---:|:---:|:---:|:---:|
+| 1 | DeepSeek-OCR (P100, 4-bit) | 281 MB | 3 | 2e-4 | 2 | 2 | 4 | ✅ | linear | 10 | adamw_8bit | 0.001 | steps | 25 | 2 |
+| 2 | DeepSeek-OCR V2 (A100, 16-bit) V1 | 1.6 GB | 50 | 2e-4 | 6 | 8 | 3 | ✅ | cosine_with_restarts | *(warmup_ratio)* | adamw_torch_fused | 0.1 | epoch | — | 8 |
+| 3 | DeepSeek-OCR V2 (A100, 16-bit) V2 | 289 MB | 50 | 2e-4 | 8 | 8 | 2 | ✅ | linear | 10 | adamw_8bit | 0.001 | epoch | — | 2 |
+| 4 | DeepSeek-OCR V2 (RTX 5090, 4-bit) | 298 MB | 50 | 2e-4 | 2 | 2 | 4 | ✅ | linear | 10 | adamw_8bit | 0.001 | epoch | — | 2 |
+| 5 | LightOnOCR-2-1B (P100, r=16) | 77 MB | 20 | 2.5e-4 | 2 | 2 | 8 | ✅ | cosine | 20 | adamw_torch_fused | 0.01 | epoch | — | 2 |
+| 6 | LightOnOCR-2-1B (P100, r=32) | 140 MB | 30 | 5e-5 | 1 | 1 | 16 | ✅ | cosine | 50 | adamw_8bit | 0.05 | epoch | — | 2 |
+| 7 | LightOnOCR-2-1B (RTX 4090, r=32) | 140 MB | 20 | 2e-4 | 4 | 4 | 1 | ✅ | linear | 10 | adamw_torch_fused | 0.001 | epoch | — | 2 |
+| 8 | DeepSeek-OCR V2 (RTX 3090, 4-bit) | 296 MB | 20 | 2e-4 | 2 | 2 | 4 | ✅ | linear | 10 | adamw_8bit | 0.001 | steps | 25 | 2 |
 
-### Key Findings
-- **Resolution matters:** Scaling the input longest edge to 1540px (Exp 7) significantly improved the model's ability to identify finer Sinhala stroke diacritics, pushing CER down to 1.05%.
-- **Regularization on small datasets:** Aggressive regularization (higher rank $r=32$ and dropout $0.1$) was counterproductive for DeepSeek-OCR V2 on this relatively small 1,010-sample dataset, as seen in the poorer performance of Exp 2 compared to Exp 3 & 4.
+---
+
+### LoRA Adapter Parameters
+
+| Exp | LoRA Rank (`lora_r`) | LoRA Alpha (`lora_alpha`) | LoRA Dropout | Quantization (`load_in_4bit`) |
+|:---:|:---:|:---:|:---:|:---|
+| 1 | 16 | 16 | 0 | ✅ TRUE (4-bit NF4) |
+| 2 | 32 | 64 | 0.1 | ❌ FALSE (16-bit) |
+| 3 | 16 | 16 | 0 | ❌ FALSE (16-bit) |
+| 4 | 16 | 16 | 0 | ✅ TRUE (4-bit NF4) |
+| 5 | 16 | 16 | 0.05 | ✅ TRUE (4-bit NF4) |
+| 6 | 32 | 64 | 0.1 | ✅ TRUE (4-bit NF4) |
+| 7 | 32 | 64 | 0.1 | ✅ TRUE (4-bit NF4) |
+| 8 | 16 | 16 | 0 | ✅ TRUE (4-bit NF4) |
+
+---
+
+### Image Processing Parameters
+
+| Exp | Model Family | `LONGEST_EDGE` (LightOnOCR) | `image_size` (DeepSeek) | `base_size` (DeepSeek) | `crop_mode` (DeepSeek) |
+|:---:|:---|:---:|:---:|:---:|:---:|
+| 1 | DeepSeek | — | 640 | 1024 | ✅ |
+| 2 | DeepSeek | — | 768 | 1024 | ✅ |
+| 3 | DeepSeek | — | 768 | 1024 | ✅ |
+| 4 | DeepSeek | — | 768 | 1024 | ✅ |
+| 5 | LightOnOCR | 700 | — | — | — |
+| 6 | LightOnOCR | 1024 | — | — | — |
+| 7 | LightOnOCR | **1540** | — | — | — |
+| 8 | DeepSeek | — | 768 | 1024 | ✅ |
+
+> 💡 **Experiment 7** used the highest input resolution (longest edge = **1540 px**), which is the key differentiator enabling it to resolve fine Sinhala stroke diacritics.
+
+---
+
+### Fine-Tuning Technique Summary
+
+| Exp | Fine-Tuning Technique |
+|:---:|:---|
+| 1 | LoRA + QLoRA (4-bit), gradient checkpointing, mixed precision |
+| 2 | LoRA, gradient checkpointing, mixed precision |
+| 3 | LoRA, gradient checkpointing, mixed precision |
+| 4 | LoRA + QLoRA (4-bit), gradient checkpointing, mixed precision |
+| 5 | LoRA + QLoRA (4-bit), gradient checkpointing, mixed precision |
+| 6 | QLoRA (4-bit), gradient checkpointing, mixed precision |
+| 7 | QLoRA (4-bit), gradient checkpointing, mixed precision |
+| 8 | QLoRA (4-bit), gradient checkpointing, mixed precision |
+
+---
+
+> **Dataset:** All experiments use the `sinhala-ocr-lk-acts-1010` dataset (1,010 samples) with a **70 / 10 / 20** train / validation / test split (707 train · 101 val · 202 test).
