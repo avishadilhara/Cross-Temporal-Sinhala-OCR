@@ -8,18 +8,21 @@ This repository contains the experimental results for the fine-tuning of Vision-
 
 The table below shows the full hyperparameter configurations for all 8 fine-tuning experiments (Experiments 1–8) conducted on the `sinhala-ocr-lk-acts-1010` dataset (1,010 samples, split 70/10/20).
 
-### Training Parameters
 
-| Exp | Base Model | GPU |  Model Size | LoRA | QLoRA | Epochs | Learning Rate | Train BS | Eval BS | Grad. Accum. | Grad. Checkpointing | LR Scheduler | Warmup Steps | Warmup ratio | Optimizer | Weight Decay | Eval Strategy | Eval Steps | Dataloader Workers |
-|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| 1 | DeepSeek-OCR V1 | P100 | 281 MB | - | TRUE | 3 | 2e-4 | 2 | 2 | 4 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | steps | 25 | 2 |
-| 2 | DeepSeek-OCR V2 | A100 | 1.6 GB | TRUE | - | 50 | 2e-4 | 6 | 8 | 3 | TRUE | cosine_with_restarts | - | 0.03 | adamw_torch_fused | 0.1 | epoch | — | 8 |
-| 3 | DeepSeek-OCR V2 | A100 | 289 MB | TRUE | - | 50 | 2e-4 | 8 | 8 | 2 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | epoch | — | 2 |
-| 4 | DeepSeek-OCR V2 | RTX 5090 | 298 MB | - | TRUE | 50 | 2e-4 | 2 | 2 | 4 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | epoch | — | 2 |
-| 5 | LightOnOCR-2-1B | P100 | 77 MB | - | TRUE | 20 | 2.5e-4 | 2 | 2 | 8 | TRUE | cosine | 20 | - | adamw_torch_fused | 0.01 | epoch | — | 2 |
-| 6 | LightOnOCR-2-1B | P100 | 140 MB | - | TRUE | 30 | 5e-5 | 1 | 1 | 16 | TRUE | cosine | 50 | - | adamw_8bit | 0.05 | epoch | — | 2 |
-| 7 | LightOnOCR-2-1B | RTX 4090 | 140 MB | - | TRUE | 20 | 2e-4 | 4 | 4 | 1 | TRUE | linear | 10 | - | adamw_torch_fused | 0.001 | epoch | — | 2 |
-| 8 | DeepSeek-OCR V2 | RTX 3090 | 296 MB | - | TRUE | 20 | 2e-4 | 2 | 2 | 4 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | steps | 25 | 2 |
+---
+
+## GPU and Model size
+
+| Exp | Base Model | GPU |  Model Size |
+|:---:|:---|:---:|:---:|
+| 1 | DeepSeek-OCR V1 | P100 | 281 MB |
+| 2 | DeepSeek-OCR V2 | A100 | 1.6 GB |
+| 3 | DeepSeek-OCR V2 | A100 | 289 MB |
+| 4 | DeepSeek-OCR V2 | RTX 5090 | 298 MB |
+| 5 | LightOnOCR-2-1B | P100 | 77 MB |
+| 6 | LightOnOCR-2-1B | P100 | 140 MB |
+| 7 | LightOnOCR-2-1B | RTX 4090 | 140 MB |
+| 8 | DeepSeek-OCR V2 | RTX 3090 | 296 MB |
 
 ---
 
@@ -27,14 +30,29 @@ The table below shows the full hyperparameter configurations for all 8 fine-tuni
 
 | Exp | LoRA Rank (`lora_r`) | LoRA Alpha (`lora_alpha`) | LoRA Dropout | Quantization (`load_in_4bit`) |
 |:---:|:---:|:---:|:---:|:---|
-| 1 | 16 | 16 | 0 | ✅ TRUE (4-bit NF4) |
-| 2 | 32 | 64 | 0.1 | ❌ FALSE (16-bit) |
-| 3 | 16 | 16 | 0 | ❌ FALSE (16-bit) |
-| 4 | 16 | 16 | 0 | ✅ TRUE (4-bit NF4) |
-| 5 | 16 | 16 | 0.05 | ✅ TRUE (4-bit NF4) |
-| 6 | 32 | 64 | 0.1 | ✅ TRUE (4-bit NF4) |
-| 7 | 32 | 64 | 0.1 | ✅ TRUE (4-bit NF4) |
-| 8 | 16 | 16 | 0 | ✅ TRUE (4-bit NF4) |
+| 1 | 16 | 16 | 0 | TRUE (4-bit NF4) |
+| 2 | 32 | 64 | 0.1 |  FALSE (16-bit) |
+| 3 | 16 | 16 | 0 |  FALSE (16-bit) |
+| 4 | 16 | 16 | 0 |  TRUE (4-bit NF4) |
+| 5 | 16 | 16 | 0.05 |  TRUE (4-bit NF4) |
+| 6 | 32 | 64 | 0.1 |  TRUE (4-bit NF4) |
+| 7 | 32 | 64 | 0.1 |  TRUE (4-bit NF4) |
+| 8 | 16 | 16 | 0 |  TRUE (4-bit NF4) |
+
+---
+
+### Training Parameters
+
+| Exp | Base Model | Epochs | Learning Rate | Train BS | Eval BS | Grad. Accum. | Grad. Checkpointing | LR Scheduler | Warmup Steps | Warmup ratio | Optimizer | Weight Decay | Eval Strategy | Eval Steps | Dataloader Workers |
+|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|:---:|:---|:---:|:---:|
+| 1 | DeepSeek-OCR V1 | 3 | 2e-4 | 2 | 2 | 4 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | steps | 25 | 2 |
+| 2 | DeepSeek-OCR V2 | 50 | 2e-4 | 6 | 8 | 3 | TRUE | cosine_with_restarts | - | 0.03 | adamw_torch_fused | 0.1 | epoch | — | 8 |
+| 3 | DeepSeek-OCR V2 | 50 | 2e-4 | 8 | 8 | 2 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | epoch | — | 2 |
+| 4 | DeepSeek-OCR V2 | 50 | 2e-4 | 2 | 2 | 4 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | epoch | — | 2 |
+| 5 | LightOnOCR-2-1B | 20 | 2.5e-4 | 2 | 2 | 8 | TRUE | cosine | 20 | - | adamw_torch_fused | 0.01 | epoch | — | 2 |
+| 6 | LightOnOCR-2-1B | 30 | 5e-5 | 1 | 1 | 16 | TRUE | cosine | 50 | - | adamw_8bit | 0.05 | epoch | — | 2 |
+| 7 | LightOnOCR-2-1B | 20 | 2e-4 | 4 | 4 | 1 | TRUE | linear | 10 | - | adamw_torch_fused | 0.001 | epoch | — | 2 |
+| 8 | DeepSeek-OCR V2 | 20 | 2e-4 | 2 | 2 | 4 | TRUE | linear | 10 | - | adamw_8bit | 0.001 | steps | 25 | 2 |
 
 ---
 
