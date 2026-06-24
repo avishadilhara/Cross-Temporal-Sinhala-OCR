@@ -28,16 +28,16 @@ The table below shows the full hyperparameter configurations for all 8 fine-tuni
 
 ### LoRA Adapter Parameters
 
-| Exp | LoRA Rank (`lora_r`) | LoRA Alpha (`lora_alpha`) | LoRA Dropout | Quantization (`load_in_4bit`) |
-|:---:|:---:|:---:|:---:|:---|
-| 1 | 16 | 16 | 0 | TRUE (4-bit NF4) |
-| 2 | 32 | 64 | 0.1 |  FALSE (16-bit) |
-| 3 | 16 | 16 | 0 |  FALSE (16-bit) |
-| 4 | 16 | 16 | 0 |  TRUE (4-bit NF4) |
-| 5 | 16 | 16 | 0.05 |  TRUE (4-bit NF4) |
-| 6 | 32 | 64 | 0.1 |  TRUE (4-bit NF4) |
-| 7 | 32 | 64 | 0.1 |  TRUE (4-bit NF4) |
-| 8 | 16 | 16 | 0 |  TRUE (4-bit NF4) |
+| Exp | Base Model |  LoRA Rank (`lora_r`) | LoRA Alpha (`lora_alpha`) | LoRA Dropout | Quantization (`load_in_4bit`) |
+|:---:|:---:|:---:|:---:|:---|:---|
+| 1 | DeepSeek-OCR V1 | 16 | 16 | 0 | TRUE (4-bit NF4) |
+| 2 | DeepSeek-OCR V2 | 32 | 64 | 0.1 |  FALSE (16-bit) |
+| 3 | DeepSeek-OCR V2 | 16 | 16 | 0 |  FALSE (16-bit) |
+| 4 | DeepSeek-OCR V2 | 16 | 16 | 0 |  TRUE (4-bit NF4) |
+| 5 | LightOnOCR-2-1B | 16 | 16 | 0.05 |  TRUE (4-bit NF4) |
+| 6 | LightOnOCR-2-1B | 32 | 64 | 0.1 |  TRUE (4-bit NF4) |
+| 7 | LightOnOCR-2-1B | 32 | 64 | 0.1 |  TRUE (4-bit NF4) |
+| 8 | DeepSeek-OCR V2 | 16 | 16 | 0 |  TRUE (4-bit NF4) |
 
 ---
 
