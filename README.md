@@ -1,7 +1,5 @@
 # Cross-Temporal Sinhala OCR: Page-Level Adaptation and Diachronic Analysis
 
-> **Note:** The dataset and model weights linked below are currently private and will be made public upon the release of the associated research paper.
-
 ## About the Research
 
 Optical Character Recognition (OCR) for low-resource and complex-script languages like Sinhala often suffers from lower accuracy compared to high-resource languages. Furthermore, existing Sinhala OCR evaluations have primarily been conducted on synthetic images or limited font sets, with no publicly available datasets of real, printed Sinhala documents.
