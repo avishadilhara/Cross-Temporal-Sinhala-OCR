@@ -1,3 +1,8 @@
+[![arXiv](https://img.shields.io/badge/arXiv-2606.29378-B31B1B?style=flat-square&logo=arxiv)](https://arxiv.org/abs/2606.29378)
+[![MERCon 2026](https://img.shields.io/badge/Accepted-MERCon%202026-2EA3F7?style=flat-square)](https://arxiv.org/abs/2606.29378)
+[![CER](https://img.shields.io/badge/CER-1.05%25-brightgreen?style=flat-square)](https://arxiv.org/abs/2606.29378)
+
+
 # Cross-Temporal Sinhala OCR: Page-Level Adaptation and Diachronic Analysis
 
 ## About the Research
